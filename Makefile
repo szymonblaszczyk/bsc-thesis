@@ -13,7 +13,10 @@ howdy:
 stop:
 	docker-compose stop
 
+discovery: NAME=discovery-service
+discovery: buildone
+
 repo: NAME=repository-service
 repo: buildone
 
-all: repo howdy
+all: discovery repo start howdy

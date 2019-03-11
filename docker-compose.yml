@@ -1,6 +1,18 @@
 version: '3.7'
 services:
-  repository-service:
-    build: repository-service
+
+  discovery-service:
+    build:
+      context: discovery-service
+      dockerfile: Dockerfile
     ports:
-      - 8080:8080
+      - 8866:8866
+
+  repository-service:
+    build:
+      context: repository-service
+      dockerfile: Dockerfile
+    ports:
+      - 8001:8080
+    depends_on:
+      - discovery-service
