@@ -1,4 +1,4 @@
-package pl.ife.tcs
+package pl.ife.tcs.repositoryservice
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
