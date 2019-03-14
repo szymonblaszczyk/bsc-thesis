@@ -1,28 +1,30 @@
 version: '3.7'
 services:
 
-  config-service:
-    build:
-      context: config-service
-      dockerfile: Dockerfile
-    ports:
-      - 8888:8888
-
   discovery-service:
     build:
       context: discovery-service
       dockerfile: Dockerfile
     ports:
-      - 8866:8866
+    - "8761:8761"
+
+  config-service:
+    build:
+      context: config-service
+      dockerfile: Dockerfile
+    env_file:
+      - github.env
+    ports:
+      - "8888:8888"
     depends_on:
-    - config-service
+      - discovery-service
 
   repository-service:
     build:
       context: repository-service
       dockerfile: Dockerfile
     ports:
-      - 8001:8080
+      - "8001:8080"
     depends_on:
       - config-service
       - discovery-service

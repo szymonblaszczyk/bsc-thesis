@@ -1,7 +1,5 @@
 buildone:
 	cd ${NAME} && ./gradlew clean build -x test
-
-startone:
 	docker-compose build ${NAME}
 	docker-compose up -d ${NAME}
 
@@ -15,13 +13,13 @@ howdy:
 stop:
 	docker-compose stop
 
-config: NAME=config-service
-config: buildone
+config:
+	cd config-service && ./gradlew clean build -x test
 
-discovery: NAME=discovery-service
-discovery: buildone
+discovery:
+	cd discovery-service && ./gradlew clean build -x test
 
-repo: NAME=repository-service
-repo: buildone
+repo:
+	cd repository-service && ./gradlew clean build -x test
 
-all: discovery repo start howdy
+all: config discovery repo start howdy
