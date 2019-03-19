@@ -1,6 +1,20 @@
 version: '3.7'
 services:
 
+  config-service:
+    build:
+      context: config-service
+      dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+    env_file:
+    - github.env
+    ports:
+    - "8888:8888"
+
   discovery-service:
     build:
       context: discovery-service
@@ -8,16 +22,8 @@ services:
     ports:
     - "8761:8761"
 
-  config-service:
-    build:
-      context: config-service
-      dockerfile: Dockerfile
-    env_file:
-      - github.env
-    ports:
-      - "8888:8888"
     depends_on:
-      - discovery-service
+      - config-service
 
   repository-service:
     build:
