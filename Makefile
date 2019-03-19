@@ -22,4 +22,7 @@ discovery:
 repo:
 	cd repository-service && ./gradlew clean build -x test
 
-all: config discovery repo start howdy
+gate:
+	cd gateway-service && ./gradlew clean build -x test
+
+all: config discovery gate repo start howdy

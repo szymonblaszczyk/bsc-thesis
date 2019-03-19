@@ -6,7 +6,7 @@ services:
       context: config-service
       dockerfile: Dockerfile
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8888"]
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8888"]
       interval: 5s
       timeout: 10s
       retries: 3
@@ -19,18 +19,33 @@ services:
     build:
       context: discovery-service
       dockerfile: Dockerfile
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8761"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
     ports:
     - "8761:8761"
-
+    restart: on-failure
     depends_on:
       - config-service
+
+  gateway-service:
+    build:
+      context: gateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - config-service
+      - discovery-service
 
   repository-service:
     build:
       context: repository-service
       dockerfile: Dockerfile
     ports:
-      - "8001:8080"
+      - "8081:8080"
     depends_on:
       - config-service
       - discovery-service
