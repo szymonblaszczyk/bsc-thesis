@@ -1,4 +1,4 @@
-buildone:
+runone:
 	cd ${NAME} && ./gradlew clean build -x test
 	docker-compose build ${NAME}
 	docker-compose up -d ${NAME}

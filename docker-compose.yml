@@ -5,11 +5,6 @@ services:
     build:
       context: config-service
       dockerfile: Dockerfile
-    healthcheck:
-      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8888"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
     env_file:
     - github.env
     ports:
@@ -19,11 +14,6 @@ services:
     build:
       context: discovery-service
       dockerfile: Dockerfile
-    healthcheck:
-      test: ["CMD-SHELL", "curl", "-f", "http://localhost:8761"]
-      interval: 5s
-      timeout: 10s
-      retries: 3
     ports:
     - "8761:8761"
     restart: on-failure
