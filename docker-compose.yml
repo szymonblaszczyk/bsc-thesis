@@ -20,16 +20,6 @@ services:
     depends_on:
       - config-service
 
-  gateway-service:
-    build:
-      context: gateway-service
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    depends_on:
-      - config-service
-      - discovery-service
-
   repository-service:
     build:
       context: repository-service
@@ -39,3 +29,14 @@ services:
     depends_on:
       - config-service
       - discovery-service
+
+  gateway-service:
+    build:
+      context: gateway-service
+      dockerfile: Dockerfile
+    ports:
+    - "8080:8080"
+    depends_on:
+    - config-service
+    - discovery-service
+    - repository-service

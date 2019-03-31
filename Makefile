@@ -26,3 +26,6 @@ gate:
 	cd gateway-service && ./gradlew clean build -x test
 
 all: config discovery gate repo start howdy
+
+pushconfig:
+	cd service-configuration/ && git commit -a -m "Update configs" && git push && cd ..

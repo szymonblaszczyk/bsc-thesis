@@ -1,4 +1,4 @@
-package pl.ife.tcs.gatewayservice.config
+package pl.ife.tcs.repositoryservice.config
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
