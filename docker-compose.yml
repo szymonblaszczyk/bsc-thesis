@@ -30,6 +30,16 @@ services:
       - config-service
       - discovery-service
 
+  basic-client-service:
+    build:
+      context: basic-client-service
+      dockerfile: Dockerfile
+    ports:
+      - "8082:8080"
+    depends_on:
+      - config-service
+      - discovery-service
+
   gateway-service:
     build:
       context: gateway-service
@@ -40,3 +50,4 @@ services:
     - config-service
     - discovery-service
     - repository-service
+    - basic-client-service
