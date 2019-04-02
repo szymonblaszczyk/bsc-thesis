@@ -12,8 +12,8 @@ import springfox.documentation.swagger.web.SwaggerResourcesProvider
 class SwaggerDocumentationController: SwaggerResourcesProvider {
 
     override fun get(): MutableList<SwaggerResource> = mutableListOf(
-            getSwaggerResourceForService("repository"),
-            getSwaggerResourceForService("basic-client")
+            getSwaggerResource("repository-service", "/api/repository-service/v2/api-docs", "2.0"),
+            getSwaggerResource("basic-client-service", "/api/basic-client-service/v2/api-docs", "2.0")
     )
 
     private fun getSwaggerResourceForService(serviceName: String): SwaggerResource {
