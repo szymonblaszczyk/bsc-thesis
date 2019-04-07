@@ -10,7 +10,7 @@ abstract class AbstractKotlinJpaPersistable<T : Serializable> {
 
     @Id
     @GeneratedValue
-    private var id: T? = null
+    var id: T? = null
 
     override fun equals(other: Any?): Boolean {
         other ?: return false
