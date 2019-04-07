@@ -1,15 +1,15 @@
 package pl.ife.tcs.basicclientservice.controller
 
-import com.netflix.discovery.EurekaClient
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import org.springframework.web.client.RestTemplate
 import pl.ife.tcs.basicclientservice.service.RepositoryService
+import pl.ife.tcs.commonlib.model.FlexibleResponseModel
 import java.util.logging.Logger
 
 
@@ -28,9 +28,17 @@ class BasicClientController @Autowired constructor(
     fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
 
     @ApiOperation(value = "Greet another service")
-    @GetMapping("/greetings/{serviceId}")
+    @GetMapping("greetings/{serviceId}")
     fun greet(@PathVariable serviceId: String): ResponseEntity<String> {
         val response = repositoryService.getGreeting()
         return ResponseEntity.ok("- Hello, who are you? - $response")
+    }
+
+    @ApiOperation(value = "Obtain flex response from repository")
+    @GetMapping("repository/flex")
+    fun getFlexibleResponseFromRepository(@RequestParam number: Int): ResponseEntity<FlexibleResponseModel> {
+        val response = repositoryService.getFlexResponse(number)
+                ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(response)
     }
 }

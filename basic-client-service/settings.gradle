@@ -4,3 +4,5 @@ pluginManagement {
 	}
 }
 rootProject.name = 'basic-client-service'
+include':common-lib'
+project(':common-lib').projectDir = new File(settingsDir, '../common-lib')
