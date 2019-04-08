@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import pl.ife.tcs.commonlib.model.FlexibleResponseModel
+import pl.ife.tcs.commonlib.model.SyncPolicy
+import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
+import java.time.LocalDateTime
 import java.util.logging.Logger
 
 @Service
@@ -24,8 +26,11 @@ class RepositoryService @Autowired constructor(
         return restTemplate.getForObject(url, String::class.java)
     }
 
-    fun getFlexResponse(number: Int): FlexibleResponseModel? {
-        val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/flex").queryParam("number", number).toUriString()
+    fun getSnapshot(date: LocalDateTime?): FlexibleResponseModel? {
+        val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/policy")
+                .queryParam("date", date)
+                .queryParam("policy", SyncPolicy.SNAPSHOT)
+                .toUriString()
         logger.info("Calling $repositoryServiceId at URL: $url")
         return restTemplate.getForObject(url, FlexibleResponseModel::class.java)
     }

@@ -1,20 +1,27 @@
 package pl.ife.tcs.repositoryservice.controller
 
 import io.swagger.annotations.ApiOperation
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import pl.ife.tcs.commonlib.model.CollectionResponse
-import pl.ife.tcs.commonlib.model.EntityModel
-import pl.ife.tcs.commonlib.model.ErrorResponse
-import pl.ife.tcs.commonlib.model.FlexibleResponseModel
+import pl.ife.tcs.commonlib.model.SyncPolicy
+import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
+import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
+import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
+import pl.ife.tcs.commonlib.model.persistency.EntityModel
+import pl.ife.tcs.repositoryservice.repository.EntityRepository
+import java.time.LocalDateTime
 import java.util.logging.Logger
 
 @RestController
-class RepositoryController {
+class RepositoryController @Autowired constructor(
+        private val entityRepository: EntityRepository
+) {
 
     @Value("\${spring.application.name:}")
     val applicationName: String = ""
@@ -25,20 +32,66 @@ class RepositoryController {
     @GetMapping("greetings")
     fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
 
-    @ApiOperation(value = "Test error response")
-    @GetMapping("error")
-    fun genError(@RequestParam message: String): ResponseEntity<FlexibleResponseModel> {
-        return ResponseEntity.ok().body(ErrorResponse(message))
+    @ApiOperation(value = "Get all data rows from the repository")
+    @GetMapping("all")
+    fun getAll(): ResponseEntity<List<EntityModel>> {
+        return ResponseEntity.ok(entityRepository.findAll())
     }
 
-    @ApiOperation(value = "Test flexible response")
-    @GetMapping("flex")
-    fun getFlexible(@RequestParam number: Int): ResponseEntity<FlexibleResponseModel> {
-        val response = if (number < 6) {
-            val list: List<EntityModel> = List(number) { EntityModel(it) }
-            CollectionResponse(list)
+    @ApiOperation(value = "Get size of the repository")
+    @GetMapping("size")
+    fun getSize(): ResponseEntity<Long> {
+        return ResponseEntity.ok(entityRepository.count())
+    }
+
+    @ApiOperation(value = "Generate new data rows")
+    @PostMapping("generate")
+    fun addNewRows(@RequestParam number: Int): ResponseEntity<Void> {
+        val list: List<EntityModel> = List(number) { EntityModel(it) }
+        val save = entityRepository.saveAll(list)
+        logger.info("Added ${save.size} new data rows to the repository")
+        return ResponseEntity.ok().build()
+    }
+
+    @ApiOperation(value = "Get data rows according to sync policy")
+    @GetMapping("policy")
+    fun getByPolicy(
+            @RequestParam(required = true) policy: SyncPolicy,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: LocalDateTime?
+    ): ResponseEntity<FlexibleResponseModel> {
+        val response = when (policy) {
+            SyncPolicy.SNAPSHOT -> {
+                val rows = entityRepository.findAll()
+                logger.info("Fetched whole repository with ${rows.size} data rows")
+                SnapshotResponse(rows)
+            }
+            SyncPolicy.DIFF -> {
+                val rows = entityRepository.findNewerThan(date)
+                logger.info("Fetched ${rows.size} data rows newer than $date from the repository")
+                DifferentialResponse(rows)
+            }
+            SyncPolicy.EVENT -> TODO()
+        }
+        logger.info("Responding with ${response.javaClass.name} to request with sync policy $policy")
+        return ResponseEntity.ok(response)
+    }
+
+
+
+    @Deprecated("") //TODO Delete soon!
+    @ApiOperation(value = "Get data rows created and/or updated after given date")
+    @GetMapping("after")
+    fun getRowsAfter(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: LocalDateTime?
+    ): ResponseEntity<FlexibleResponseModel> {
+        val response = if (date != null) {
+            val rows = entityRepository.findNewerThan(date)
+            logger.info("Fetched ${rows.size} data rows newer than $date from the repository")
+            DifferentialResponse(rows)
         } else {
-            ErrorResponse("Sorry, that number is too big")
+            val rows = entityRepository.findAll()
+            logger.info("Fetched whole repository with ${rows.size} data rows")
+            SnapshotResponse(rows)
         }
         return ResponseEntity.ok(response)
     }
