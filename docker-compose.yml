@@ -42,6 +42,17 @@ services:
       - config-service
       - discovery-service
 
+  diff-client-service:
+    build:
+      context: diff-client-service
+      dockerfile: Dockerfile
+    ports:
+      - "8083:8080"
+      - "8093:8000"
+    depends_on:
+      - config-service
+      - discovery-service
+
   gateway-service:
     build:
       context: gateway-service
@@ -53,3 +64,4 @@ services:
     - discovery-service
     - repository-service
     - basic-client-service
+    - diff-client-service

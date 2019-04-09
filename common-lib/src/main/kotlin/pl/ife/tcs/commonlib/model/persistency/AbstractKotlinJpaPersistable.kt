@@ -14,8 +14,8 @@ abstract class AbstractKotlinJpaPersistable<T : Serializable> {
     @GeneratedValue
     var id: T? = null
 
-    @Version
-    var version: Long? = null
+//    @Version
+//    private var version: Long = 0
 
     var dateCreated: LocalDateTime? = null
     var dateUpdated: LocalDateTime? = null

@@ -25,10 +25,13 @@ repo:
 basic:
 	cd basic-client-service && ./gradlew clean build -x test
 
+diff:
+	cd diff-client-service && ./gradlew clean build -x test
+
 gate:
 	cd gateway-service && ./gradlew clean build -x test
 
-all: config discovery gate repo basic start howdy
+all: config discovery gate repo basic diff start howdy
 
 pushconfig:
 	cd service-configuration/ && git commit -a -m "Update configs" && git push && cd ..
