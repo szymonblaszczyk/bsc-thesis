@@ -4,9 +4,8 @@ import javax.persistence.Entity
 
 @Entity
 class EntityModel(
-        val value: Int,
-        var positiveLong: Long = Long.MAX_VALUE,
-        var negativeLong: Long = Long.MIN_VALUE,
-        var positiveDouble: Double = Double.MAX_VALUE,
-        var negativeDouble: Double = Double.MIN_VALUE
+        var booleanValue: Boolean,
+        var intValue: Int,
+        var longValue: Long,
+        var doubleValue: Double
 ) : AbstractKotlinJpaPersistable<Long>()

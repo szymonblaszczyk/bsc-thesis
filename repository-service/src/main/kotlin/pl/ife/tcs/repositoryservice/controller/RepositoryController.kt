@@ -15,6 +15,7 @@ import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
 import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
 import pl.ife.tcs.repositoryservice.repository.EntityRepository
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.logging.Logger
 
@@ -47,7 +48,7 @@ class RepositoryController @Autowired constructor(
     @ApiOperation(value = "Generate new data rows")
     @PostMapping("generate")
     fun addNewRows(@RequestParam number: Int): ResponseEntity<Void> {
-        val list: List<EntityModel> = List(number) { EntityModel(it) }
+        val list: List<EntityModel> = List(number) { EntityModel(true, 0, 0L, 0.0) }
         val save = entityRepository.saveAll(list)
         logger.info("Added ${save.size} new data rows to the repository")
         return ResponseEntity.ok().build()
@@ -66,33 +67,13 @@ class RepositoryController @Autowired constructor(
                 SnapshotResponse(rows)
             }
             SyncPolicy.DIFF -> {
-                val rows = entityRepository.findNewerThan(date)
+                val rows = if (date != null) entityRepository.findNewerThan(date) else entityRepository.findAll()
                 logger.info("Fetched ${rows.size} data rows newer than $date from the repository")
                 DifferentialResponse(rows)
             }
             SyncPolicy.EVENT -> TODO()
         }
         logger.info("Responding with ${response.javaClass.name} to request with sync policy $policy")
-        return ResponseEntity.ok(response)
-    }
-
-
-
-    @Deprecated("") //TODO Delete soon!
-    @ApiOperation(value = "Get data rows created and/or updated after given date")
-    @GetMapping("after")
-    fun getRowsAfter(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: LocalDateTime?
-    ): ResponseEntity<FlexibleResponseModel> {
-        val response = if (date != null) {
-            val rows = entityRepository.findNewerThan(date)
-            logger.info("Fetched ${rows.size} data rows newer than $date from the repository")
-            DifferentialResponse(rows)
-        } else {
-            val rows = entityRepository.findAll()
-            logger.info("Fetched whole repository with ${rows.size} data rows")
-            SnapshotResponse(rows)
-        }
         return ResponseEntity.ok(response)
     }
 }
