@@ -15,13 +15,15 @@ import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
 import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
 import pl.ife.tcs.repositoryservice.repository.EntityRepository
+import pl.ife.tcs.repositoryservice.service.EntityFactory
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.logging.Logger
 
 @RestController
 class RepositoryController @Autowired constructor(
-        private val entityRepository: EntityRepository
+        private val entityRepository: EntityRepository,
+        private val entityFactory: EntityFactory
 ) {
 
     @Value("\${spring.application.name:}")
@@ -48,7 +50,17 @@ class RepositoryController @Autowired constructor(
     @ApiOperation(value = "Generate new data rows")
     @PostMapping("generate")
     fun addNewRows(@RequestParam number: Int): ResponseEntity<Void> {
-        val list: List<EntityModel> = List(number) { EntityModel(true, 0, 0L, 0.0) }
+        val list: List<EntityModel> = entityFactory.generateEntities(number)
+        val save = entityRepository.saveAll(list)
+        logger.info("Added ${save.size} new data rows to the repository")
+        return ResponseEntity.ok().build()
+    }
+
+    @ApiOperation(value = "Initialised repository accordingly to project configuration")
+    @PostMapping("init")
+    fun initRepo(): ResponseEntity<Void> {
+        entityRepository.deleteAll()
+        val list: List<EntityModel> = entityFactory.generateEntitiesConfigured()
         val save = entityRepository.saveAll(list)
         logger.info("Added ${save.size} new data rows to the repository")
         return ResponseEntity.ok().build()
