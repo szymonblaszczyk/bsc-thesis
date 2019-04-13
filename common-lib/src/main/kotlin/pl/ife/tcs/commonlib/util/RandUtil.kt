@@ -10,7 +10,11 @@ object RandUtil{
     }
 
     @JvmStatic fun getRandomLong(): Long {
-        return ThreadLocalRandom.current().nextLong()
+        return getRandomLong(Int.MIN_VALUE.toLong(), Int.MAX_VALUE.toLong())
+    }
+
+    @JvmStatic fun getRandomLong(from: Long, to: Long): Long {
+        return ThreadLocalRandom.current().nextLong(from, to)
     }
 
     @JvmStatic fun <T> pickRandomElements(list: List<T>, n: Int): List<T> {

@@ -5,25 +5,26 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
-import pl.ife.tcs.commonlib.model.SyncPolicy
+import org.springframework.web.bind.annotation.*
+import pl.ife.tcs.commonlib.model.networking.SyncPolicy
 import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
 import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
 import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
+import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
+import pl.ife.tcs.repositoryservice.repository.EntityEventRepository
 import pl.ife.tcs.repositoryservice.repository.EntityRepository
 import pl.ife.tcs.repositoryservice.service.EntityFactory
-import java.time.LocalDate
+import pl.ife.tcs.repositoryservice.service.EntityManipulator
 import java.time.LocalDateTime
 import java.util.logging.Logger
 
 @RestController
 class RepositoryController @Autowired constructor(
         private val entityRepository: EntityRepository,
-        private val entityFactory: EntityFactory
+        private val entityFactory: EntityFactory,
+        private val entityManipulator: EntityManipulator,
+        private val entityEventRepository: EntityEventRepository
 ) {
 
     @Value("\${spring.application.name:}")
@@ -36,39 +37,62 @@ class RepositoryController @Autowired constructor(
     fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
 
     @ApiOperation(value = "Get all data rows from the repository")
-    @GetMapping("all")
-    fun getAll(): ResponseEntity<List<EntityModel>> {
+    @GetMapping("entities/all")
+    fun getAllEntities(): ResponseEntity<List<EntityModel>> {
         return ResponseEntity.ok(entityRepository.findAll())
     }
 
-    @ApiOperation(value = "Get size of the repository")
-    @GetMapping("size")
-    fun getSize(): ResponseEntity<Long> {
+    @ApiOperation(value = "Get size of the entities repository")
+    @GetMapping("entities/size")
+    fun getAllEntitiesSize(): ResponseEntity<Long> {
         return ResponseEntity.ok(entityRepository.count())
     }
 
+    @ApiOperation(value = "Get all event changes from the repository")
+    @GetMapping("events/all")
+    fun getAllEvents(): ResponseEntity<List<EntityEventModel>> {
+        return ResponseEntity.ok(entityEventRepository.findAll())
+    }
+
+    @ApiOperation(value = "Get size of the event repository")
+    @GetMapping("events/size")
+    fun getAllEventsSize(): ResponseEntity<Long> {
+        return ResponseEntity.ok(entityEventRepository.count())
+    }
+
     @ApiOperation(value = "Generate new data rows")
-    @PostMapping("generate")
-    fun addNewRows(@RequestParam number: Int): ResponseEntity<Void> {
-        val list: List<EntityModel> = entityFactory.generateEntities(number)
+    @PostMapping("entities/generate")
+    fun addToRepo(@RequestParam number: Int): ResponseEntity<Void> {
+        val list: List<EntityModel> = entityFactory.getEntities(number)
         val save = entityRepository.saveAll(list)
         logger.info("Added ${save.size} new data rows to the repository")
         return ResponseEntity.ok().build()
     }
 
     @ApiOperation(value = "Initialised repository accordingly to project configuration")
-    @PostMapping("init")
+    @PostMapping("entities/init")
     fun initRepo(): ResponseEntity<Void> {
         entityRepository.deleteAll()
-        val list: List<EntityModel> = entityFactory.generateEntitiesConfigured()
+        val list: List<EntityModel> = entityFactory.getEntities()
         val save = entityRepository.saveAll(list)
         logger.info("Added ${save.size} new data rows to the repository")
         return ResponseEntity.ok().build()
     }
 
+    @ApiOperation(value = "Mutates the content of the repository accordingly to project configuration")
+    @PutMapping("entities/update")
+    fun updateRepo(): ResponseEntity<Void> {
+        val entities = entityRepository.findAll()
+        val (updatedEntities, events) = entityManipulator.randomiseCollection(entities)
+        val entitiesSave = entityRepository.saveAll(updatedEntities)
+        val eventsSave = entityEventRepository.saveAll(events)
+        logger.info("Updated collection of ${entitiesSave.size} applying ${eventsSave.size} events")
+        return ResponseEntity.ok().build()
+    }
+
     @ApiOperation(value = "Get data rows according to sync policy")
-    @GetMapping("policy")
-    fun getByPolicy(
+    @GetMapping("entities/policy")
+    fun getEntitiesByPolicy(
             @RequestParam(required = true) policy: SyncPolicy,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) date: LocalDateTime?
     ): ResponseEntity<FlexibleResponseModel> {

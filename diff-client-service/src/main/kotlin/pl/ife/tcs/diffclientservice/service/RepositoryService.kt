@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
-import pl.ife.tcs.commonlib.model.SyncPolicy
+import pl.ife.tcs.commonlib.model.networking.SyncPolicy
 import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
 import java.time.LocalDateTime
 import java.util.logging.Logger
@@ -27,7 +27,7 @@ class RepositoryService @Autowired constructor(
     }
 
     fun getSnapshot(date: LocalDateTime?): FlexibleResponseModel? {
-        val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/policy")
+        val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/entities/policy")
                 .queryParam("date", date)
                 .queryParam("policy", SyncPolicy.DIFF)
                 .toUriString()

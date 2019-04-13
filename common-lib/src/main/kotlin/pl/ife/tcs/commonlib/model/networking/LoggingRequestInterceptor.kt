@@ -14,8 +14,10 @@ class LoggingRequestInterceptor: ClientHttpRequestInterceptor {
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         logRequest(request)
+        val start = System.currentTimeMillis()
         val response = execution.execute(request, body)
-        logResponse(response)
+        val executionTime = System.currentTimeMillis() - start
+        logResponse(response, executionTime)
         return response
     }
 
@@ -30,12 +32,12 @@ class LoggingRequestInterceptor: ClientHttpRequestInterceptor {
         }
     }
 
-    private fun logResponse(response: ClientHttpResponse) {
+    private fun logResponse(response: ClientHttpResponse, executionTime: Long) {
         with(logger) {
             info(separator, "Response Begin")
             info("Status Code    : {}", response.statusCode)
-            info("Status Text    : {}", response.statusText)
-            info("Bytesize       : {}", if (response.statusCode.is2xxSuccessful) response.body.readBytes().size else "-")
+            info("Execution Time : {}", executionTime)
+            info("Byte Size      : {}", if (response.statusCode.is2xxSuccessful) response.body.readBytes().size else "-")
             info("Headers        : {}", response.headers)
             info(separator, "Response End")
         }

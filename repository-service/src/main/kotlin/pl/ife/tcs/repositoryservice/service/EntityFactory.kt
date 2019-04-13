@@ -11,19 +11,44 @@ class EntityFactory {
     @Value("\${thesis.table.length:1}") val tableLength: Int = 1
     @Value("\${thesis.entity.length:1}") val entityLength: Int = 1
 
-    val sessionEntityFields: List<String> by lazy { List(entityLength) { RandUtil.getRandomString() } }
-
-    fun generateEntities(n: Int): List<EntityModel> {
-        return List(n) { generateEntity() }
+    /**
+     * Returns a list of {@link pl.ife.tcs.commonlib.model.persistency.EntityModel}
+     * of length given by the project properties
+     * */
+    fun getEntities(): List<EntityModel> {
+        return getEntities(tableLength)
     }
 
-    fun generateEntitiesConfigured(): List<EntityModel> {
-        return List(tableLength) { generateEntity() }
+    /**
+     * Returns a list of {@link pl.ife.tcs.commonlib.model.persistency.EntityModel}
+     * of length given by
+     *
+     * @param n the desired number of new objects
+     * */
+    fun getEntities(n: Int): List<EntityModel> {
+        return List(n) { getEntity() }
     }
 
-    fun generateEntity(): EntityModel {
-        val attributes = mutableMapOf<String, Long>()
-        sessionEntityFields.forEach { attributes[it] = RandUtil.getRandomLong() }
+    /**
+     * Returns a single new {@link pl.ife.tcs.commonlib.model.persistency.EntityModel}
+     * object with a number of attributes given by the project properties
+     * all initialised with random values
+     * */
+    fun getEntity(): EntityModel {
+        return getEntity(true, entityLength)
+    }
+
+    /**
+     * Returns a single new {@link pl.ife.tcs.commonlib.model.persistency.EntityModel}
+     * object with a number of attributes given by the project properties
+     *
+     * @param initialised whether or not the attributes should be initalised
+     * with random values (if true) or with null (if false)
+     * @param n the desired number of attributes in the object
+     * */
+    fun getEntity(initialised: Boolean, n: Int): EntityModel {
+        val attributes = mutableMapOf<String, Long?>()
+        for (i in 0..n) { if (initialised) attributes["Val$i"] = RandUtil.getRandomLong() }
         return EntityModel( attributes )
     }
 }

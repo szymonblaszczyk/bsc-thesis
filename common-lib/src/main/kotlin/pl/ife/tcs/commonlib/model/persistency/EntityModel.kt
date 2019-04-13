@@ -12,6 +12,6 @@ class EntityModel(
 ) : AbstractKotlinJpaPersistable<Long>() {
 
     val attributes: Set<String>
-        @JsonIgnore @Transient get() = attributeMap.keys
-
+        @JsonIgnore @Transient
+        get() = attributeMap.keys
 }
