@@ -59,7 +59,7 @@ class DiffClientController @Autowired constructor(
                 logger.warning("Obtained error: ${response.error}")
                 ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
             }
-            is SnapshotResponse -> {
+            else -> {
                 logger.warning { "Obtained response of incompatible type: ${response.javaClass.simpleName}" }
                 ResponseEntity.unprocessableEntity().build()
             }

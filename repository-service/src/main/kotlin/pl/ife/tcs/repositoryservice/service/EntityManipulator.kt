@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
+import pl.ife.tcs.commonlib.model.persistency.EventType
 import pl.ife.tcs.commonlib.util.RandUtil
 
 @Service
@@ -35,7 +36,7 @@ class EntityManipulator {
             changes[it] = randomValue
             entity.attributeMap.toMutableMap()[it] = randomValue
         }
-        val event = EntityEventModel(entity.id!!, changes)
+        val event = EntityEventModel(entity.id!!, EventType.EDITED, changes)
         return Pair(entity, event)
     }
 }

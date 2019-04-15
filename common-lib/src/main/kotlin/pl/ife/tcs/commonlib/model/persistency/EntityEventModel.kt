@@ -6,6 +6,7 @@ import javax.persistence.Entity
 @Entity
 data class EntityEventModel(
         val entityId: Long,
+        val eventType: EventType,
         @ElementCollection
-        val changes: Map<String, Long>
+        val changes: Map<String, Long?>
 ): AbstractKotlinJpaPersistable<Long>()

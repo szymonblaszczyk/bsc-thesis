@@ -1,4 +1,4 @@
-package pl.ife.tcs.basicclientservice.controller
+package pl.ife.tcs.eventclientservice.controller
 
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
@@ -6,29 +6,23 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
-import pl.ife.tcs.basicclientservice.repository.EntityRepository
-import pl.ife.tcs.basicclientservice.service.RepositoryService
-import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
-import pl.ife.tcs.commonlib.model.networking.ErrorResponse
-import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
-import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
+import pl.ife.tcs.commonlib.model.networking.*
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
-import java.time.LocalDateTime
+import pl.ife.tcs.eventclientservice.repository.EntityRepository
+import pl.ife.tcs.eventclientservice.service.RepositoryService
 import java.util.logging.Logger
 
 
 @RestController
-class BasicClientController @Autowired constructor(
+class EventClientController @Autowired constructor(
         private val repositoryService: RepositoryService,
         private val entityRepository: EntityRepository
 ){
     @Value("\${spring.application.name:}")
     val applicationName: String = ""
 
-    private val logger: Logger = Logger.getLogger(BasicClientController::class.simpleName)
+    private val logger: Logger = Logger.getLogger(EventClientController::class.simpleName)
 
     @ApiOperation(value = "Greet the user")
     @GetMapping("greetings")
@@ -53,9 +47,9 @@ class BasicClientController @Autowired constructor(
         val response = repositoryService.getSnapshot(latestUpdateDate)
                 ?: return ResponseEntity.notFound().build()
         return when (response) {
-            is SnapshotResponse -> {
+            is EventDrivenResponse -> {
                 logger.info("Obtained ${response.collection.size} data rows from repository, saving")
-                entityRepository.saveAll(response.collection)
+//                val updatedRows = entityRepository.findAllById(response.collection.map { it.entityId })
                 ResponseEntity.ok(response)
             }
             is ErrorResponse -> {

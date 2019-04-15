@@ -53,6 +53,17 @@ services:
       - config-service
       - discovery-service
 
+  event-client-service:
+    build:
+      context: event-client-service
+      dockerfile: Dockerfile
+    ports:
+      - "8084:8080"
+      - "8094:8000"
+    depends_on:
+      - config-service
+      - discovery-service
+
   gateway-service:
     build:
       context: gateway-service
@@ -65,3 +76,4 @@ services:
     - repository-service
     - basic-client-service
     - diff-client-service
+    - event-client-service

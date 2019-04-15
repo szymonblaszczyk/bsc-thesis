@@ -6,12 +6,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import pl.ife.tcs.commonlib.model.networking.SyncPolicy
-import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
-import pl.ife.tcs.commonlib.model.networking.FlexibleResponseModel
-import pl.ife.tcs.commonlib.model.networking.SnapshotResponse
+import pl.ife.tcs.commonlib.model.networking.*
 import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
+import pl.ife.tcs.commonlib.model.persistency.EventType
 import pl.ife.tcs.repositoryservice.repository.EntityEventRepository
 import pl.ife.tcs.repositoryservice.repository.EntityRepository
 import pl.ife.tcs.repositoryservice.service.EntityFactory
@@ -34,7 +32,9 @@ class RepositoryController @Autowired constructor(
 
     @ApiOperation(value = "Greet the user")
     @GetMapping("greetings")
-    fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
+    fun getGreetings(): ResponseEntity<String> {
+        return ResponseEntity.ok("Hello, my name is $applicationName!")
+    }
 
     @ApiOperation(value = "Get all data rows from the repository")
     @GetMapping("entities/all")
@@ -60,22 +60,26 @@ class RepositoryController @Autowired constructor(
         return ResponseEntity.ok(entityEventRepository.count())
     }
 
-    @ApiOperation(value = "Generate new data rows")
-    @PostMapping("entities/generate")
-    fun addToRepo(@RequestParam number: Int): ResponseEntity<Void> {
-        val list: List<EntityModel> = entityFactory.getEntities(number)
-        val save = entityRepository.saveAll(list)
-        logger.info("Added ${save.size} new data rows to the repository")
-        return ResponseEntity.ok().build()
-    }
-
     @ApiOperation(value = "Initialised repository accordingly to project configuration")
     @PostMapping("entities/init")
     fun initRepo(): ResponseEntity<Void> {
         entityRepository.deleteAll()
-        val list: List<EntityModel> = entityFactory.getEntities()
-        val save = entityRepository.saveAll(list)
-        logger.info("Added ${save.size} new data rows to the repository")
+        val entities = entityFactory.getEntities()
+        val entitiesSave = entityRepository.saveAll(entities)
+        val events = entitiesSave.map { EntityEventModel(it.id!!, EventType.CREATED, it.attributeMap) }
+        val eventsSave = entityEventRepository.saveAll(events)
+        logger.info("Added ${entitiesSave.size} new data rows and ${eventsSave.size} to the repository")
+        return ResponseEntity.ok().build()
+    }
+
+    @ApiOperation(value = "Generate new data rows")
+    @PostMapping("entities/generate")
+    fun addToRepo(@RequestParam number: Int): ResponseEntity<Void> {
+        val entities = entityFactory.getEntities(number)
+        val entitiesSave = entityRepository.saveAll(entities)
+        val events = entitiesSave.map { EntityEventModel(it.id!!, EventType.CREATED, it.attributeMap) }
+        val eventsSave = entityEventRepository.saveAll(events)
+        logger.info("Added ${entitiesSave.size} new data rows and ${eventsSave.size} to the repository")
         return ResponseEntity.ok().build()
     }
 
@@ -107,7 +111,11 @@ class RepositoryController @Autowired constructor(
                 logger.info("Fetched ${rows.size} data rows newer than $date from the repository")
                 DifferentialResponse(rows)
             }
-            SyncPolicy.EVENT -> TODO()
+            SyncPolicy.EVENT -> {
+                val events = if (date != null) entityEventRepository.findNewerThan(date) else entityEventRepository.findAll()
+                logger.info("Fetched ${events.size} entity events newer than $date from the repository")
+                EventDrivenResponse(events)
+            }
         }
         logger.info("Responding with ${response.javaClass.name} to request with sync policy $policy")
         return ResponseEntity.ok(response)
