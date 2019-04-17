@@ -41,6 +41,8 @@ services:
     depends_on:
       - config-service
       - discovery-service
+    volumes:
+      - "./exports/basic/:/opt/exports"
 
   diff-client-service:
     build:
@@ -52,6 +54,8 @@ services:
     depends_on:
       - config-service
       - discovery-service
+    volumes:
+    - "./exports/diff/:/opt/exports"
 
   event-client-service:
     build:
@@ -63,6 +67,8 @@ services:
     depends_on:
       - config-service
       - discovery-service
+    volumes:
+    - "./exports/event/:/opt/exports"
 
   gateway-service:
     build:

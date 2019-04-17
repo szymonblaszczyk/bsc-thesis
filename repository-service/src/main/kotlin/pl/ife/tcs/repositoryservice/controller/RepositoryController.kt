@@ -60,13 +60,20 @@ class RepositoryController @Autowired constructor(
         return ResponseEntity.ok(entityEventRepository.count())
     }
 
-    @ApiOperation(value = "Initialised repository accordingly to project configuration")
+    @ApiOperation(value = "Initialise repository accordingly to project configuration")
     @PostMapping("entities/init")
     fun initRepo(): ResponseEntity<Void> {
         entityRepository.deleteAll()
+        entityEventRepository.deleteAll()
         val entities = entityFactory.getEntities()
         val entitiesSave = entityRepository.saveAll(entities)
-        val events = entitiesSave.map { EntityEventModel(it.id!!, EventType.CREATED, it.attributeMap) }
+        val events = entitiesSave.map {
+            EntityEventModel(
+                    it.id!!,
+                    EventType.CREATED,
+                    mapOf( *it.attributeMap.map { Pair(it.key, it.value) }.toTypedArray())
+            )
+        }
         val eventsSave = entityEventRepository.saveAll(events)
         logger.info("Added ${entitiesSave.size} new data rows and ${eventsSave.size} to the repository")
         return ResponseEntity.ok().build()

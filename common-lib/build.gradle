@@ -37,6 +37,7 @@ dependencies {
 	implementation 'org.springframework.data:spring-data-commons:2.1.5.RELEASE'
     implementation 'org.springframework:spring-web:5.1.5.RELEASE'
 	implementation 'org.hibernate:hibernate-core:5.4.2.Final'
+    implementation 'org.apache.commons:commons-csv:1.6'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.9.8'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
 }
