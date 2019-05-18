@@ -2,9 +2,7 @@ package pl.ife.tcs.repositoryservice.service
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
-import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
-import pl.ife.tcs.commonlib.model.persistency.EntityModel
-import pl.ife.tcs.commonlib.model.persistency.EventType
+import pl.ife.tcs.commonlib.model.persistency.*
 import pl.ife.tcs.commonlib.util.RandUtil
 
 @Service
@@ -28,15 +26,16 @@ class EntityManipulator {
     }
 
     fun randomise(entity: EntityModel, n: Int): Pair<EntityModel, EntityEventModel>  {
-        val changes = hashMapOf<String, Long>()
+        val changes = mutableMapOf<String, EntityAttributeValueChangeModel<Long>>()
         val attributes = entity.attributes.toList()
         val randomAttributes = RandUtil.pickRandomElements(attributes, n)
         randomAttributes.forEach {
+            val updatedValue = entity.attributeMap.toMutableMap()[it]
             val randomValue = RandUtil.getRandomLong()
-            changes[it] = randomValue
+            changes[it] = EntityAttributeValueChangeModel(updatedValue, randomValue)
             entity.attributeMap.toMutableMap()[it] = randomValue
         }
-        val event = EntityEventModel(entity.id!!, EventType.EDITED, changes)
+        val event = EntityUpdatedEventModel(entity.id!!, changes)
         return Pair(entity, event)
     }
 }

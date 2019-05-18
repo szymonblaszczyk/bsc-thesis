@@ -7,9 +7,7 @@ import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import pl.ife.tcs.commonlib.model.networking.*
-import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
-import pl.ife.tcs.commonlib.model.persistency.EntityModel
-import pl.ife.tcs.commonlib.model.persistency.EventType
+import pl.ife.tcs.commonlib.model.persistency.*
 import pl.ife.tcs.repositoryservice.repository.EntityEventRepository
 import pl.ife.tcs.repositoryservice.repository.EntityRepository
 import pl.ife.tcs.repositoryservice.service.EntityFactory
@@ -67,13 +65,7 @@ class RepositoryController @Autowired constructor(
         entityEventRepository.deleteAll()
         val entities = entityFactory.getEntities()
         val entitiesSave = entityRepository.saveAll(entities)
-        val events = entitiesSave.map {
-            EntityEventModel(
-                    it.id!!,
-                    EventType.CREATED,
-                    mapOf( *it.attributeMap.map { Pair(it.key, it.value) }.toTypedArray())
-            )
-        }
+        val events = entitiesSave.map { EntityCreatedEventModel(it.id!!, it.attributeMap) }
         val eventsSave = entityEventRepository.saveAll(events)
         logger.info("Added ${entitiesSave.size} new data rows and ${eventsSave.size} to the repository")
         return ResponseEntity.ok().build()
@@ -84,7 +76,7 @@ class RepositoryController @Autowired constructor(
     fun addToRepo(@RequestParam number: Int): ResponseEntity<Void> {
         val entities = entityFactory.getEntities(number)
         val entitiesSave = entityRepository.saveAll(entities)
-        val events = entitiesSave.map { EntityEventModel(it.id!!, EventType.CREATED, it.attributeMap) }
+        val events = entitiesSave.map { EntityCreatedEventModel(it.id!!, it.attributeMap) }
         val eventsSave = entityEventRepository.saveAll(events)
         logger.info("Added ${entitiesSave.size} new data rows and ${eventsSave.size} to the repository")
         return ResponseEntity.ok().build()
