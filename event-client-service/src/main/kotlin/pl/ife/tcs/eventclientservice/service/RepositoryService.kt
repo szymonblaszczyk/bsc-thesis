@@ -2,6 +2,9 @@ package pl.ife.tcs.eventclientservice.service
 
 import com.netflix.discovery.EurekaClient
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpEntity
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Service
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
@@ -26,12 +29,20 @@ class RepositoryService @Autowired constructor(
         return restTemplate.getForObject(url, String::class.java)
     }
 
-    fun getSnapshot(date: LocalDateTime?): FlexibleResponseModel? {
+    fun getSnapshot(init: Boolean, missedCycles: Int, date: LocalDateTime?): FlexibleResponseModel? {
         val url = UriComponentsBuilder.fromHttpUrl("$baseUrl/entities/policy")
                 .queryParam("date", date)
-                .queryParam("policy", SyncPolicy.DIFF)
+                .queryParam("policy", SyncPolicy.EVENT)
                 .toUriString()
         logger.info("Calling $repositoryServiceId at URL: $url")
-        return restTemplate.getForObject(url, FlexibleResponseModel::class.java)
+        return restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                HttpEntity("body", HttpHeaders().apply {
+                    this.set("init", init.toString())
+                    this.set("missedCycles", missedCycles.toString())
+                }),
+                FlexibleResponseModel::class.java
+        ).body
     }
 }

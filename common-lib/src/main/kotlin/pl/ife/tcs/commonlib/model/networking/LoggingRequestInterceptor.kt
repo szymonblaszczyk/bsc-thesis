@@ -10,11 +10,23 @@ import org.springframework.http.client.ClientHttpResponse
 import java.io.File
 import java.io.FileWriter
 
-class LoggingRequestInterceptor: ClientHttpRequestInterceptor {
+class LoggingRequestInterceptor(
+        private val tableLength: Int,
+        private val entityWidth: Int,
+        private val entityUpdateBatch: Int,
+        private val collectionUpdateBatch: Int
+) : ClientHttpRequestInterceptor {
 
     private val separator = "========================= {} ========================="
 
     private val logger = LoggerFactory.getLogger(this::class.java)!!
+
+    private val filename
+        get() = "L${tableLength}W${entityWidth}E${collectionUpdateBatch}A${entityUpdateBatch}S${missedCycles}_log${if (isInit)"_INIT" else ""}"
+
+    private var isInit: Boolean = false
+
+    private var missedCycles: Int = 0
 
     override fun intercept(request: HttpRequest, body: ByteArray, execution: ClientHttpRequestExecution): ClientHttpResponse {
         val csvData = mutableListOf<String>()
@@ -37,6 +49,8 @@ class LoggingRequestInterceptor: ClientHttpRequestInterceptor {
             info("Headers        : {}", request.headers.apply { csvData.add(this.toString()) })
             info(separator, "Request End")
         }
+        isInit = request.headers["init"]?.first()?.toBoolean() ?: false
+        missedCycles = request.headers["missedCycles"]?.first()?.toInt() ?: 0
         return csvData
     }
 
@@ -54,8 +68,8 @@ class LoggingRequestInterceptor: ClientHttpRequestInterceptor {
         return csvData
     }
 
-    private fun printCsvLog(csvData: List<String>) {
-        val file = File("/opt/exports/log.csv")
+    private fun printCsvLog( csvData: List<String>) {
+        val file = File("/opt/exports/$filename.csv")
         val filePreexists = file.exists()
         var fileWriter: FileWriter? = null
         var csvPrinter: CSVPrinter? = null

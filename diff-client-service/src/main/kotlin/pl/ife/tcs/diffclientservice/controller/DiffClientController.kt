@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
 import pl.ife.tcs.commonlib.model.networking.ErrorResponse
@@ -45,9 +47,10 @@ class DiffClientController @Autowired constructor(
 
     @ApiOperation(value = "Get new data rows from the repository")
     @GetMapping("repository/sync")
-    fun syncWithRepository(): ResponseEntity<FlexibleResponseModel> {
+    fun syncWithRepository(@RequestHeader missedCycles: Int): ResponseEntity<FlexibleResponseModel> {
+        val isInit = entityRepository.findAll().isEmpty()
         val latestUpdateDate = entityRepository.findNewestUpdateDate()
-        val response = repositoryService.getSnapshot(latestUpdateDate)
+        val response = repositoryService.getSnapshot(isInit, missedCycles, latestUpdateDate)
                 ?: return ResponseEntity.notFound().build()
         return when (response) {
             is DifferentialResponse -> {
@@ -64,5 +67,12 @@ class DiffClientController @Autowired constructor(
                 ResponseEntity.unprocessableEntity().build()
             }
         }
+    }
+
+    @ApiOperation(value = "Flush client's repository")
+    @DeleteMapping("repository/flush")
+    fun flushRepository(): ResponseEntity<Void> {
+        entityRepository.deleteAll()
+        return ResponseEntity.ok().build()
     }
 }

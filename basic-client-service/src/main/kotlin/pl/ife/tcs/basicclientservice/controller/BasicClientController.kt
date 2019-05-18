@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import pl.ife.tcs.basicclientservice.repository.EntityRepository
 import pl.ife.tcs.basicclientservice.service.RepositoryService
 import pl.ife.tcs.commonlib.model.networking.DifferentialResponse
@@ -48,9 +45,10 @@ class BasicClientController @Autowired constructor(
 
     @ApiOperation(value = "Get new data rows from the repository")
     @GetMapping("repository/sync")
-    fun syncWithRepository(): ResponseEntity<FlexibleResponseModel> {
+    fun syncWithRepository(@RequestHeader missedCycles: Int): ResponseEntity<FlexibleResponseModel> {
+        val isInit = entityRepository.findAll().isEmpty()
         val latestUpdateDate = entityRepository.findNewestUpdateDate()
-        val response = repositoryService.getSnapshot(latestUpdateDate)
+        val response = repositoryService.getSnapshot(isInit, missedCycles, latestUpdateDate)
                 ?: return ResponseEntity.notFound().build()
         return when (response) {
             is SnapshotResponse -> {
@@ -67,5 +65,12 @@ class BasicClientController @Autowired constructor(
                 ResponseEntity.unprocessableEntity().build()
             }
         }
+    }
+
+    @ApiOperation(value = "Flush client's repository")
+    @DeleteMapping("repository/flush")
+    fun flushRepository(): ResponseEntity<Void> {
+        entityRepository.deleteAll()
+        return ResponseEntity.ok().build()
     }
 }

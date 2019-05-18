@@ -5,10 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 import pl.ife.tcs.commonlib.model.networking.*
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
+import pl.ife.tcs.eventclientservice.adapter.EntityEventAdapter
 import pl.ife.tcs.eventclientservice.repository.EntityRepository
 import pl.ife.tcs.eventclientservice.service.RepositoryService
 import java.util.logging.Logger
@@ -17,7 +20,8 @@ import java.util.logging.Logger
 @RestController
 class EventClientController @Autowired constructor(
         private val repositoryService: RepositoryService,
-        private val entityRepository: EntityRepository
+        private val entityRepository: EntityRepository,
+        private val entityEventAdapter: EntityEventAdapter
 ){
     @Value("\${spring.application.name:}")
     val applicationName: String = ""
@@ -42,14 +46,16 @@ class EventClientController @Autowired constructor(
 
     @ApiOperation(value = "Get new data rows from the repository")
     @GetMapping("repository/sync")
-    fun syncWithRepository(): ResponseEntity<FlexibleResponseModel> {
+    fun syncWithRepository(@RequestHeader missedCycles: Int): ResponseEntity<FlexibleResponseModel> {
+        val isInit = entityRepository.findAll().isEmpty()
         val latestUpdateDate = entityRepository.findNewestUpdateDate()
-        val response = repositoryService.getSnapshot(latestUpdateDate)
+        val response = repositoryService.getSnapshot(isInit, missedCycles, latestUpdateDate)
                 ?: return ResponseEntity.notFound().build()
         return when (response) {
             is EventDrivenResponse -> {
                 logger.info("Obtained ${response.collection.size} data rows from repository, saving")
-//                val updatedRows = entityRepository.findAllById(response.collection.map { it.entityId })
+                val updatedRows = entityEventAdapter.apply(entityRepository.findAll(), response.collection)
+                entityRepository.saveAll(updatedRows)
                 ResponseEntity.ok(response)
             }
             is ErrorResponse -> {
@@ -61,5 +67,12 @@ class EventClientController @Autowired constructor(
                 ResponseEntity.unprocessableEntity().build()
             }
         }
+    }
+
+    @ApiOperation(value = "Flush client's repository")
+    @DeleteMapping("repository/flush")
+    fun flushRepository(): ResponseEntity<Void> {
+        entityRepository.deleteAll()
+        return ResponseEntity.ok().build()
     }
 }

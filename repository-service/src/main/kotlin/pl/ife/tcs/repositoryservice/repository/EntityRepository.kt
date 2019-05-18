@@ -8,6 +8,6 @@ import java.time.LocalDateTime
 
 interface EntityRepository : JpaRepository<EntityModel, Long> {
 
-    @Query("SELECT m FROM EntityModel m WHERE m.dateUpdated >= :date")
+    @Query("SELECT m FROM EntityModel m WHERE m.dateUpdated >= :date ORDER BY dateUpdated DESC")
     fun findNewerThan(@Param("date") date: LocalDateTime?): List<EntityModel>
 }

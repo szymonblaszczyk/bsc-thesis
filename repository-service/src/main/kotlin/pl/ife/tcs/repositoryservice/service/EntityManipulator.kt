@@ -20,23 +20,22 @@ class EntityManipulator {
     fun randomiseCollection(collection: MutableList<EntityModel>, n: Int): Pair<List<EntityModel>, List<EntityEventModel>> {
         val randomEntities = RandUtil.pickRandomElements(collection, n)
         val changes = randomEntities.map { randomise(it) }
-        return Pair(collection, changes.map { it.second })
+        return Pair(collection, changes.flatMap { it.second })
     }
 
-    fun randomise(entity: EntityModel): Pair<EntityModel, EntityEventModel> {
+    fun randomise(entity: EntityModel): Pair<EntityModel, List<EntityEventModel>> {
         return randomise(entity, entityUpdateBatch)
     }
 
-    fun randomise(entity: EntityModel, n: Int): Pair<EntityModel, EntityEventModel>  {
-        val changes = hashMapOf<String, Long>()
+    fun randomise(entity: EntityModel, n: Int): Pair<EntityModel, List<EntityEventModel>>  {
+        val changeEvents = mutableListOf<EntityEventModel>()
         val attributes = entity.attributes.toList()
         val randomAttributes = RandUtil.pickRandomElements(attributes, n)
         randomAttributes.forEach {
             val randomValue = RandUtil.getRandomLong()
-            changes[it] = randomValue
-            entity.attributeMap.toMutableMap()[it] = randomValue
+            changeEvents.add(EntityEventModel(entity.id!!, EventType.EDITED, mapOf(Pair(it, randomValue))))
+            entity.attributeMap[it] = randomValue
         }
-        val event = EntityEventModel(entity.id!!, EventType.EDITED, changes)
-        return Pair(entity, event)
+        return Pair(entity, changeEvents)
     }
 }

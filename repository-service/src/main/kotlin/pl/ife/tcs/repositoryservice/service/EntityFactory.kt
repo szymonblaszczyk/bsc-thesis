@@ -9,7 +9,7 @@ import pl.ife.tcs.commonlib.util.RandUtil
 class EntityFactory {
 
     @Value("\${thesis.table.length:1}") val tableLength: Int = 1
-    @Value("\${thesis.entity.length:1}") val entityLength: Int = 1
+    @Value("\${thesis.entity.width:1}") val entityWidth: Int = 1
 
     /**
      * Returns a list of {@link pl.ife.tcs.commonlib.model.persistency.EntityModel}
@@ -35,7 +35,7 @@ class EntityFactory {
      * all initialised with random values
      * */
     fun getEntity(): EntityModel {
-        return getEntity(true, entityLength)
+        return getEntity(true, entityWidth)
     }
 
     /**

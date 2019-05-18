@@ -8,7 +8,7 @@ import javax.persistence.Transient
 @Entity
 class EntityModel(
         @ElementCollection
-        val attributeMap: Map<String, Long?>
+        val attributeMap: MutableMap<String, Long?>
 ) : AbstractKotlinJpaPersistable<Long>() {
 
     val attributes: Set<String>

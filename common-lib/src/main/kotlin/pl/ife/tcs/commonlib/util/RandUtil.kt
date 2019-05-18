@@ -21,9 +21,12 @@ object RandUtil{
         val rand = ThreadLocalRandom.current()
         val length = list.size
 
-        if (length < n) return list
+        if (length == 0 || n == 100) return list
 
-        for (i in length - 1 downTo length - n) {
+        val percentage = Math.round(length.times(n.toBigDecimal().divide(100.toBigDecimal()).toFloat()))
+        val percentageAdjusted = if (percentage == 0) 1 else percentage
+
+        for (i in length - 1 downTo length - percentageAdjusted) {
             Collections.swap(list, i, rand.nextInt(i + 1))
         }
 
