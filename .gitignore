@@ -4,6 +4,7 @@ HELP.md
 !repository-service/gradle/wrapper/gradle-wrapper.jar
 /service-configuration
 /classes
+*.hprof
 
 ### STS ###
 .apt_generated
