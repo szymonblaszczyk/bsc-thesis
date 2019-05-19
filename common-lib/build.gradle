@@ -35,6 +35,7 @@ dependencies {
 	implementation 'org.jetbrains.kotlin:kotlin-reflect'
 	implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 	implementation 'org.springframework.data:spring-data-commons:2.1.5.RELEASE'
+	implementation 'org.springframework.data:spring-data-jpa:2.1.5.RELEASE'
     implementation 'org.springframework:spring-web:5.1.5.RELEASE'
     implementation 'org.springframework.boot:spring-boot-starter-web:2.1.5.RELEASE'
 	implementation 'org.hibernate:hibernate-core:5.4.2.Final'

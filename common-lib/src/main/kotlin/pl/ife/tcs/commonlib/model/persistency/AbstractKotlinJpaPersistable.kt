@@ -1,5 +1,9 @@
 package pl.ife.tcs.commonlib.model.persistency
 
+import org.hibernate.annotations.GenericGenerator
+import org.springframework.data.annotation.CreatedDate
+import org.springframework.data.annotation.LastModifiedDate
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
 import org.springframework.data.util.ProxyUtils
 import java.io.Serializable
 import java.time.LocalDateTime
@@ -8,21 +12,23 @@ import javax.persistence.*
 /** See <a href="https://kotlinexpertise.com/hibernate-with-kotlin-spring-boot/">Kotlin Expertise</a> */
 
 @MappedSuperclass
+@EntityListeners(AuditingEntityListener::class)
 abstract class AbstractKotlinJpaPersistable<T : Serializable> {
 
     @Id
-    @GeneratedValue
+    @GenericGenerator(name = "ImportIdGenerator", strategy = "pl.ife.tcs.commonlib.model.persistency.ImportIdGenerator")
+    @GeneratedValue(generator = "ImportIdGenerator")
+    @Column(unique = true, nullable = false)
     var id: T? = null
 
-//    @Version
-//    private var version: Long = 0
-
+    @Column(name = "dateCreated")
     var dateCreated: LocalDateTime? = null
+    @Column(name = "dateUpdated")
     var dateUpdated: LocalDateTime? = null
 
 
     @PrePersist
-    @PreUpdate
+    /** @PreUpdate <- Not working for reasons undetermined. @see AuditableListener for a by-pass solution */
     fun updateTimestamps() {
         val currentDate = LocalDateTime.now()
         dateUpdated = currentDate

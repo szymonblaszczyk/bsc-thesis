@@ -20,7 +20,7 @@ class EntityManipulator {
     fun randomiseCollection(collection: MutableList<EntityModel>, n: Int): Pair<List<EntityModel>, List<EntityEventModel>> {
         val randomEntities = RandUtil.pickRandomElements(collection, n)
         val changes = randomEntities.map { randomise(it) }
-        return Pair(collection, changes.flatMap { it.second })
+        return Pair(changes.map { it.first }, changes.flatMap { it.second })
     }
 
     fun randomise(entity: EntityModel): Pair<EntityModel, List<EntityEventModel>> {

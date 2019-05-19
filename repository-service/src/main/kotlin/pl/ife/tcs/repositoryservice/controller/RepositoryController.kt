@@ -71,7 +71,7 @@ class RepositoryController @Autowired constructor(
             EntityEventModel(
                     it.id!!,
                     EventType.CREATED,
-                    mapOf( *it.attributeMap.map { Pair(it.key, it.value) }.toTypedArray())
+                    mapOf(*it.attributeMap.map { Pair(it.key, it.value) }.toTypedArray())
             )
         }
         val eventsSave = entityEventRepository.saveAll(events)
@@ -97,7 +97,11 @@ class RepositoryController @Autowired constructor(
         val (updatedEntities, events) = entityManipulator.randomiseCollection(entities)
         val entitiesSave = entityRepository.saveAll(updatedEntities)
         val eventsSave = entityEventRepository.saveAll(events)
-        logger.info("Updated collection of ${entitiesSave.size} applying ${eventsSave.size} events")
+//        updatedEntities.forEach { entityRepository.saveAndFlush(it) }
+//        events.forEach { entityEventRepository.saveAndFlush(it) }
+//        entityRepository.flush()
+//        entityEventRepository.flush()
+        logger.info("Updated collection of ${updatedEntities.size} applying ${events.size} events")
         return ResponseEntity.ok().build()
     }
 

@@ -1,9 +1,8 @@
 package pl.ife.tcs.commonlib.model.persistency
 
 import com.fasterxml.jackson.annotation.JsonIgnore
-import javax.persistence.ElementCollection
-import javax.persistence.Entity
-import javax.persistence.Transient
+import org.springframework.data.jpa.domain.support.AuditingEntityListener
+import javax.persistence.*
 
 @Entity
 class EntityModel(

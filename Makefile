@@ -35,7 +35,7 @@ gate:
 	cd gateway-service && ./gradlew clean build -x test
 
 backbone:
-	docker-compose up -d gateway-service config-service discovery-service
+	docker-compose up -d config-service discovery-service
 
 all: config discovery gate repo basic diff event start howdy
 
