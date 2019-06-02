@@ -1,6 +1,7 @@
 package pl.ife.tcs.repositoryservice.service
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.context.config.annotation.RefreshScope
 import org.springframework.stereotype.Service
 import pl.ife.tcs.commonlib.model.persistency.EntityEventModel
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
@@ -8,6 +9,7 @@ import pl.ife.tcs.commonlib.model.persistency.EventType
 import pl.ife.tcs.commonlib.util.RandUtil
 
 @Service
+@RefreshScope
 class EntityManipulator {
 
     @Value("\${thesis.entity.update.operation.batch:1}") val entityUpdateBatch: Int = 1

@@ -1,6 +1,7 @@
 package pl.ife.tcs.diffclientservice.config
 
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.context.config.annotation.RefreshScope
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.client.BufferingClientHttpRequestFactory
@@ -10,6 +11,7 @@ import pl.ife.tcs.commonlib.model.networking.LoggingRequestInterceptor
 
 
 @Configuration
+@RefreshScope
 class RestConfig {
 
     @Value("\${thesis.table.length:1}")
@@ -22,11 +24,10 @@ class RestConfig {
     val collectionUpdateBatch: Int = 1
 
     @Bean
+    @RefreshScope
     fun restTemplate(): RestTemplate {
         val restTemplate = RestTemplate(BufferingClientHttpRequestFactory(SimpleClientHttpRequestFactory()))
-        val interceptors
-                = (if (restTemplate.interceptors.isNotEmpty()) restTemplate.interceptors else listOf()).toMutableList()
-        interceptors.add(LoggingRequestInterceptor(tableLength, entityWidth, entityUpdateBatch, collectionUpdateBatch))
+        val interceptors = listOf(LoggingRequestInterceptor(tableLength, entityWidth, entityUpdateBatch, collectionUpdateBatch))
         restTemplate.interceptors = interceptors
         return restTemplate
     }

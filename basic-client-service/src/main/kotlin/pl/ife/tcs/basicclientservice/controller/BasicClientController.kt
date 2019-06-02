@@ -18,6 +18,7 @@ import java.util.logging.Logger
 
 
 @RestController
+@RequestMapping
 class BasicClientController @Autowired constructor(
         private val repositoryService: RepositoryService,
         private val entityRepository: EntityRepository

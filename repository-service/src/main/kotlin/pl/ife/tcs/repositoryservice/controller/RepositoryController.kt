@@ -3,6 +3,7 @@ package pl.ife.tcs.repositoryservice.controller
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.context.config.annotation.RefreshScope
 import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -18,6 +19,7 @@ import java.time.LocalDateTime
 import java.util.logging.Logger
 
 @RestController
+@RefreshScope
 class RepositoryController @Autowired constructor(
         private val entityRepository: EntityRepository,
         private val entityFactory: EntityFactory,

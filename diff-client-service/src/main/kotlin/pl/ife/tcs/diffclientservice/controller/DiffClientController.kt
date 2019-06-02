@@ -3,6 +3,7 @@ package pl.ife.tcs.diffclientservice.controller
 import io.swagger.annotations.ApiOperation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cloud.context.config.annotation.RefreshScope
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -17,7 +18,8 @@ import java.util.logging.Logger
 
 
 @RestController
-@RequestMapping("entities")
+@RequestMapping
+@RefreshScope
 class DiffClientController @Autowired constructor(
         private val repositoryService: RepositoryService,
         private val entityRepository: EntityRepository

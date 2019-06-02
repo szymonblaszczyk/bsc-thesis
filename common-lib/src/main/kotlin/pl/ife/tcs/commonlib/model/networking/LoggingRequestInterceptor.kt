@@ -10,7 +10,7 @@ import org.springframework.http.client.ClientHttpResponse
 import java.io.File
 import java.io.FileWriter
 
-class LoggingRequestInterceptor(
+open class LoggingRequestInterceptor(
         private val tableLength: Int,
         private val entityWidth: Int,
         private val entityUpdateBatch: Int,

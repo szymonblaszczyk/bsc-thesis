@@ -30,6 +30,6 @@ object RandUtil{
             Collections.swap(list, i, rand.nextInt(i + 1))
         }
 
-        return list.subList(length - n, length)
+        return list.subList(length - percentageAdjusted, length)
     }
 }

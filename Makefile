@@ -37,6 +37,8 @@ gate:
 backbone:
 	docker-compose up -d config-service discovery-service
 
+core: repo basic diff event gate howdy start
+
 all: config discovery gate repo basic diff event start howdy
 
 pushconfig:
