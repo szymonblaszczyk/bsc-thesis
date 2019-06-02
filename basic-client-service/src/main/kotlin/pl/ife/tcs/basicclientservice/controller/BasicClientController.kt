@@ -32,19 +32,19 @@ class BasicClientController @Autowired constructor(
     fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
 
     @ApiOperation(value = "Get all data rows from the repository")
-    @GetMapping("all")
+    @GetMapping("entities/all")
     fun getAll(): ResponseEntity<List<EntityModel>> {
         return ResponseEntity.ok(entityRepository.findAll())
     }
 
     @ApiOperation(value = "Get size of the repository")
-    @GetMapping("size")
+    @GetMapping("entities/size")
     fun getSize(): ResponseEntity<Long> {
         return ResponseEntity.ok(entityRepository.count())
     }
 
     @ApiOperation(value = "Get new data rows from the repository")
-    @GetMapping("repository/sync")
+    @GetMapping("entities/sync")
     fun syncWithRepository(@RequestHeader missedCycles: Int): ResponseEntity<FlexibleResponseModel> {
         val isInit = entityRepository.findAll().isEmpty()
         val latestUpdateDate = entityRepository.findNewestUpdateDate()
@@ -68,7 +68,7 @@ class BasicClientController @Autowired constructor(
     }
 
     @ApiOperation(value = "Flush client's repository")
-    @DeleteMapping("repository/flush")
+    @DeleteMapping("entities/flush")
     fun flushRepository(): ResponseEntity<Void> {
         entityRepository.deleteAll()
         return ResponseEntity.ok().build()

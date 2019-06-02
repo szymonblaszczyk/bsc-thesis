@@ -5,10 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import pl.ife.tcs.commonlib.model.networking.*
 import pl.ife.tcs.commonlib.model.persistency.EntityModel
 import pl.ife.tcs.eventclientservice.adapter.EntityEventAdapter
@@ -18,6 +15,7 @@ import java.util.logging.Logger
 
 
 @RestController
+@RequestMapping("entities")
 class EventClientController @Autowired constructor(
         private val repositoryService: RepositoryService,
         private val entityRepository: EntityRepository,
@@ -33,19 +31,19 @@ class EventClientController @Autowired constructor(
     fun getGreetings(): ResponseEntity<String> = ResponseEntity.ok("Hello, my name is $applicationName!")
 
     @ApiOperation(value = "Get all data rows from the repository")
-    @GetMapping("all")
+    @GetMapping("entities/all")
     fun getAll(): ResponseEntity<List<EntityModel>> {
         return ResponseEntity.ok(entityRepository.findAll())
     }
 
     @ApiOperation(value = "Get size of the repository")
-    @GetMapping("size")
+    @GetMapping("entities/size")
     fun getSize(): ResponseEntity<Long> {
         return ResponseEntity.ok(entityRepository.count())
     }
 
     @ApiOperation(value = "Get new data rows from the repository")
-    @GetMapping("repository/sync")
+    @GetMapping("entities/sync")
     fun syncWithRepository(@RequestHeader missedCycles: Int): ResponseEntity<FlexibleResponseModel> {
         val isInit = entityRepository.findAll().isEmpty()
         val latestUpdateDate = entityRepository.findNewestUpdateDate()
@@ -70,7 +68,7 @@ class EventClientController @Autowired constructor(
     }
 
     @ApiOperation(value = "Flush client's repository")
-    @DeleteMapping("repository/flush")
+    @DeleteMapping("entities/flush")
     fun flushRepository(): ResponseEntity<Void> {
         entityRepository.deleteAll()
         return ResponseEntity.ok().build()
