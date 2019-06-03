@@ -21,7 +21,7 @@ object RandUtil{
         val rand = ThreadLocalRandom.current()
         val length = list.size
 
-        if (length == 0 || n == 100) return list
+        if (length == 0 || n >= 100) return list
 
         val percentage = Math.round(length.times(n.toBigDecimal().divide(100.toBigDecimal()).toFloat()))
         val percentageAdjusted = if (percentage == 0) 1 else percentage
